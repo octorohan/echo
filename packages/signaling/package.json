@@ -1,0 +1,25 @@
+{
+  "name": "@echo/signaling",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@echo/shared": "*",
+    "ws": "^8.17.0",
+    "ioredis": "^5.3.2",
+    "uuid": "^9.0.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.10",
+    "@types/uuid": "^9.0.8",
+    "@types/node": "^20.12.7",
+    "tsx": "^4.9.3",
+    "typescript": "^5.4.5"
+  }
+}

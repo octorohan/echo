@@ -1,0 +1,15 @@
+{
+  "name": "echo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @echo/signaling\" \"npm run dev -w @echo/matching\" \"npm run dev -w @echo/frontend\"",
+    "build": "npm run build -w @echo/shared && npm run build -w @echo/signaling && npm run build -w @echo/matching && npm run build -w @echo/frontend",
+    "typecheck": "npm run typecheck -w @echo/shared && npm run typecheck -w @echo/signaling && npm run typecheck -w @echo/matching && npm run typecheck -w @echo/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  }
+}

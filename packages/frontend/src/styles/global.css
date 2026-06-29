@@ -1,0 +1,310 @@
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; width: 100%; }
+body {
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { cursor: pointer; border: none; background: none; color: inherit; font: inherit; }
+input { font: inherit; }
+
+/* ── Landing ── */
+.landing {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 1rem;
+}
+.landing__title {
+  font-size: clamp(3rem, 10vw, 5rem);
+  font-weight: 200; letter-spacing: 0.4em;
+  opacity: 0.9;
+}
+.landing__subtitle {
+  font-size: clamp(0.75rem, 2.5vw, 1rem);
+  opacity: 0.35; letter-spacing: 0.12em;
+}
+.landing__start {
+  margin-top: 2.5rem; padding: 0.85rem 3.5rem;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 999px;
+  font-size: 1rem; letter-spacing: 0.18em; text-transform: lowercase;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+  opacity: 0.8;
+}
+.landing__start:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.55); opacity: 1; }
+
+/* ── Mood ── */
+.mood {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 2.5rem; padding: 1rem;
+}
+.mood__prompt { font-size: clamp(0.85rem, 2.5vw, 1rem); opacity: 0.4; letter-spacing: 0.08em; }
+.mood__grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem; max-width: 440px; width: 100%;
+}
+.mood__item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.25rem; padding: 1rem 0.5rem; border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08); min-height: 78px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  position: relative;
+}
+.mood__item:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.3); transform: scale(1.04); }
+.mood__item--selected { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.5); }
+.mood__emoji { font-size: 1.9rem; line-height: 1; }
+.mood__label {
+  font-size: 0.6rem; opacity: 0.55; text-align: center;
+  position: absolute; bottom: 0.35rem; left: 0; right: 0; padding: 0 0.25rem;
+}
+
+/* ── Chat ── */
+.chat { position: relative; width: 100%; height: 100%; background: #000; }
+.chat__remote {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 1;
+}
+.chat__local {
+  position: absolute; bottom: 5.5rem; right: 1rem;
+  width: 110px; height: 148px; object-fit: cover;
+  border-radius: 14px; border: 1px solid rgba(255,255,255,0.12);
+  z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.chat__peer-mood {
+  position: absolute; top: 1rem; left: 1rem; z-index: 15;
+  font-size: 1.6rem; opacity: 0.7;
+  background: rgba(0,0,0,0.4); border-radius: 50%;
+  width: 2.5rem; height: 2.5rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.chat__matching-overlay {
+  position: absolute; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.75);
+  font-size: 0.9rem; opacity: 0.45; letter-spacing: 0.12em;
+}
+
+/* immersive: hide everything except remote video */
+.chat--immersive .chat__local,
+.chat--immersive .chat__peer-mood,
+.chat--immersive .control-bar,
+.chat--immersive .bubbles,
+.chat--immersive .reactions-overlay { display: none; }
+
+/* ── Bubbles ── */
+.bubbles {
+  position: absolute; bottom: 4.5rem; left: 50%; transform: translateX(-50%);
+  width: min(420px, 88vw); z-index: 30; pointer-events: none;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.bubbles__stack {
+  display: flex; flex-direction: column; gap: 0.35rem;
+  align-items: center;
+}
+.bubbles__bubble {
+  padding: 0.45rem 1rem; border-radius: 999px;
+  font-size: 0.9rem; max-width: 85%; line-height: 1.4;
+  animation: bubble-in 0.25s ease-out;
+  backdrop-filter: blur(8px);
+}
+.bubbles__bubble--mine {
+  background: rgba(255,255,255,0.14); align-self: flex-end;
+}
+.bubbles__bubble--theirs {
+  background: rgba(255,255,255,0.07); align-self: flex-start;
+}
+.bubbles__input-wrap {
+  pointer-events: all; padding: 0 0.25rem;
+}
+.bubbles__input {
+  width: 100%;
+  background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px; padding: 0.5rem 1.1rem;
+  color: #fff; font-size: 0.9rem; outline: none;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.15s;
+}
+.bubbles__input:focus { border-color: rgba(255,255,255,0.4); }
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Control Bar ── */
+.control-bar {
+  position: absolute; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0.75rem;
+  background: rgba(0,0,0,0.45); backdrop-filter: blur(16px);
+  padding: 0.65rem 1.4rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.09);
+  z-index: 40; white-space: nowrap;
+}
+.control-bar__btn {
+  font-size: 1.35rem; opacity: 0.6;
+  transition: opacity 0.15s, transform 0.1s;
+  padding: 0.15rem;
+}
+.control-bar__btn:hover { opacity: 1; transform: scale(1.15); }
+.control-bar__btn--skip { opacity: 0.45; }
+.control-bar__reactions-wrap { position: relative; }
+.control-bar__reactions {
+  position: absolute; bottom: calc(100% + 0.6rem); left: 50%; transform: translateX(-50%);
+  display: flex; gap: 0.4rem;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(16px);
+  padding: 0.5rem 0.9rem; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.control-bar__reaction-btn {
+  font-size: 1.35rem; transition: transform 0.12s;
+}
+.control-bar__reaction-btn:hover { transform: scale(1.35); }
+.control-bar__immersive-exit {
+  position: absolute; top: 1rem; right: 1rem; z-index: 50;
+  font-size: 1.1rem; opacity: 0.25;
+  transition: opacity 0.2s; padding: 0.5rem;
+  background: rgba(0,0,0,0.4); border-radius: 50%;
+  width: 2.2rem; height: 2.2rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.control-bar__immersive-exit:hover { opacity: 0.9; }
+
+/* ── Reaction Overlay ── */
+.reactions-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  overflow: hidden;
+}
+.reactions-overlay__item {
+  position: absolute;
+  bottom: 5rem;
+  font-size: 2.4rem;
+  animation: reaction-float 3s ease-out forwards;
+  transform-origin: center bottom;
+}
+@keyframes reaction-float {
+  0%   {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  10%  {
+    opacity: 1;
+    transform: translateY(-20px) scale(1.3);
+  }
+  30%  {
+    opacity: 1;
+    transform: translateY(-80px) scale(1.1);
+  }
+  70%  {
+    opacity: 0.8;
+    transform: translateY(-200px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-340px) scale(0.85);
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 480px) {
+  .mood__grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+  .mood__item { min-height: 68px; padding: 0.75rem 0.25rem; }
+  .mood__emoji { font-size: 1.6rem; }
+  .chat__local { width: 90px; height: 120px; bottom: 5rem; }
+  .control-bar { gap: 0.5rem; padding: 0.6rem 1rem; }
+  .control-bar__btn { font-size: 1.2rem; }
+}
+
+/* ── Camera off state ── */
+.chat__local-wrap {
+  position: absolute;
+  bottom: 5.5rem;
+  right: 1rem;
+  width: 110px;
+  height: 148px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  z-index: 10;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.chat__local-wrap--off {
+  background: #111;
+}
+.chat__local {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* remove old absolute positioning — wrapper handles that now */
+  position: static;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  bottom: auto;
+  right: auto;
+  z-index: auto;
+}
+.chat__local-off-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: rgba(255,255,255,0.3);
+}
+
+/* ── Control bar active state (muted / cam off) ── */
+.control-bar__btn--active {
+  opacity: 1 !important;
+  color: #ff4444;
+}
+
+/* ── Control bar SVG sizing and shape ── */
+.control-bar__btn svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+.control-bar__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  transition: background 0.15s, opacity 0.15s, color 0.15s;
+}
+.control-bar__btn:hover {
+  background: rgba(255,255,255,0.08);
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Video pip swap ── */
+.chat__local-wrap {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.chat__local-wrap:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+  border-color: rgba(255,255,255,0.3);
+}
+.chat__local-swap-hint {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  color: rgba(255,255,255,0.5);
+  opacity: 0;
+  transition: opacity 0.15s;
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  padding: 2px 3px;
+  line-height: 1;
+}
+.chat__local-wrap:hover .chat__local-swap-hint {
+  opacity: 1;
+}
