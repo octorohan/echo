@@ -40,17 +40,17 @@ export function useWebRTC({ signaling, localVideoRef, remoteVideoRef, onStatusCh
     dc.onerror = (e) => console.error('[webrtc] dc error:', e)
   }
 
-  function sendData(payload: object): boolean {
+  const sendData = useCallback((payload: object): boolean => {
     const dc = dcRef.current
     if (!dc || dc.readyState !== 'open') return false
     dc.send(JSON.stringify(payload))
     return true
-  }
+  }, [])
 
-  function onDataMessage(fn: (data: unknown) => void) {
+  const onDataMessage = useCallback((fn: (data: unknown) => void) => {
     messageListenersRef.current.add(fn)
     return () => messageListenersRef.current.delete(fn)
-  }
+  }, [])
 
   function resetConnection() {
     pcRef.current?.close()

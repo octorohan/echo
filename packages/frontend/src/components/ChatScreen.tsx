@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect} from 'react'
 import type { MoodId } from '@echo/shared'
 import { MOODS } from '@echo/shared'
 import { useSignaling } from '../hooks/useSignaling'
@@ -6,6 +6,7 @@ import { useWebRTC } from '../hooks/useWebRTC'
 import ChatBubbles from './ChatBubbles'
 import ControlBar from './ControlBar'
 import ReactionOverlay from './ReactionOverlay'
+import ActivityPanel from './ActivityPanel'
 
 interface Props { mood: MoodId; onCancel: () => void }
 
@@ -15,19 +16,28 @@ export default function ChatScreen({ mood, onCancel }: Props) {
   const [immersive, setImmersive] = useState(false)
   const [peerMood, setPeerMood] = useState<MoodId | null>(null)
   const [status, setStatus] = useState<'matching' | 'connected' | 'disconnected'>('matching')
-  const [chatOpen, setChatOpen] = useState(false)
+const [chatOpen, setChatOpen] = useState(false)
   const [swapped, setSwapped] = useState(false)
+  const [activity, setActivity] = useState<null | 'screenshare' | 'youtube'>(null)
 
   function handleSwap() {
+    if (status !== 'connected') return  // only swap when actually connected
     const local = localVideoRef.current
     const remote = remoteVideoRef.current
-    if (!local || !remote) return
-    // swap the srcObject between the two video elements directly
+    if (!local || !remote || !remote.srcObject) return
     const tmp = local.srcObject
     local.srcObject = remote.srcObject
     remote.srcObject = tmp
     setSwapped(s => !s)
   }
+
+  // when a new match happens, reset swap state
+  // so remote always starts on the main screen
+  useEffect(() => {
+    if (status === 'matching' && swapped) {
+      setSwapped(false)
+    }
+  }, [status])
 
   const signaling = useSignaling({ mood, onPeerMood: setPeerMood, onStatusChange: setStatus })
   const webrtc = useWebRTC({ signaling, localVideoRef, remoteVideoRef, onStatusChange: setStatus })
@@ -96,6 +106,15 @@ export default function ChatScreen({ mood, onCancel }: Props) {
 
       <ReactionOverlay onDataMessage={webrtc.onDataMessage} />
 
+      {status === 'connected' && (
+        <ActivityPanel
+          activity={activity}
+          onActivityChange={setActivity}
+          sendData={webrtc.sendData}
+          onDataMessage={webrtc.onDataMessage}
+        />
+      )}
+
       <ControlBar
         status={status}
         immersive={immersive}
@@ -108,6 +127,8 @@ export default function ChatScreen({ mood, onCancel }: Props) {
         onCancel={onCancel}
         onSendReaction={webrtc.sendReaction}
         onToggleChat={() => setChatOpen(o => !o)}
+        activity={activity}
+        onActivityChange={setActivity}
       />
     </div>
   )

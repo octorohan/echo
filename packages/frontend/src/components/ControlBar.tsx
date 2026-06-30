@@ -57,6 +57,21 @@ const Icons = {
       <polyline points="17,12 17,17 12,17"/><polyline points="6,17 1,17 1,12"/>
     </svg>
   ),
+  screenshare: (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="2" width="16" height="11" rx="1"/>
+      <line x1="6" y1="17" x2="12" y2="17"/>
+      <line x1="9" y1="13" x2="9" y2="17"/>
+      <polyline points="6,8 9,5 12,8"/>
+      <line x1="9" y1="5" x2="9" y2="11"/>
+    </svg>
+  ),
+  youtube: (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="3" width="16" height="12" rx="2"/>
+      <polygon points="7,6 13,9 7,12" fill="currentColor" stroke="none" opacity="0.7"/>
+    </svg>
+  ),
 }
 
 const REACTIONS = ['😂', '❤️', '😮', '👏', '😢', '🔥']
@@ -66,6 +81,7 @@ interface Props {
   immersive: boolean
   muted: boolean
   cameraOff: boolean
+  activity: null | 'screenshare' | 'youtube'
   onToggleImmersive: () => void
   onMute: () => void
   onToggleCamera: () => void
@@ -73,12 +89,13 @@ interface Props {
   onCancel: () => void
   onSendReaction: (emoji: string) => void
   onToggleChat: () => void
+  onActivityChange: (a: null | 'screenshare' | 'youtube') => void
 }
 
 export default function ControlBar({
-  status, immersive, muted, cameraOff,
+  status, immersive, muted, cameraOff, activity,
   onToggleImmersive, onMute, onToggleCamera,
-  onSkip, onCancel, onSendReaction, onToggleChat
+  onSkip, onCancel, onSendReaction, onToggleChat, onActivityChange
 }: Props) {
   const [showReactions, setShowReactions] = useState(false)
 
@@ -141,6 +158,27 @@ export default function ControlBar({
       <button className="control-bar__btn" onClick={onToggleChat} aria-label="Chat" title="Chat">
         {Icons.chat}
       </button>
+
+      {status === 'connected' && (
+        <>
+          <button
+            className={`control-bar__btn ${activity === 'screenshare' ? 'control-bar__btn--active' : ''}`}
+            onClick={() => onActivityChange(activity === 'screenshare' ? null : 'screenshare')}
+            aria-label="Screen share"
+            title="Share screen"
+          >
+            {Icons.screenshare}
+          </button>
+          <button
+            className={`control-bar__btn ${activity === 'youtube' ? 'control-bar__btn--active' : ''}`}
+            onClick={() => onActivityChange(activity === 'youtube' ? null : 'youtube')}
+            aria-label="Watch together"
+            title="Watch YouTube together"
+          >
+            {Icons.youtube}
+          </button>
+        </>
+      )}
 
       {status === 'connected' && (
         <button className="control-bar__btn control-bar__btn--skip" onClick={onSkip} aria-label="Skip" title="Skip">

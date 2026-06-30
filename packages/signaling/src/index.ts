@@ -111,4 +111,4 @@ redisSub.on('message', (_channel, message) => {
   sendToSocket(data.socketId, data.message)
 })
 
-server.listen(PORT, () => console.log(`[signaling] running on :${PORT}`))
+server.listen(PORT, '0.0.0.0', () => console.log(`[signaling] running on :${PORT}`))
